@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Carbon Footprint Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Carbon Footprint Tracker</h1>
+
+<div class="container">
+    <input type="number" id="electricity" placeholder="Electricity (kWh)">
+    <input type="number" id="car" placeholder="Car Travel (km)">
+    <input type="number" id="flight" placeholder="Flight Hours">
+    <button onclick="calculate()">Calculate</button>
+</div>
+
+<h2>Total Emission: <span id="result">0</span> kg CO2</h2>
+
+<ul id="history"></ul>
+
+<script src="script.js"></script>
+
+</body>
+</html>
