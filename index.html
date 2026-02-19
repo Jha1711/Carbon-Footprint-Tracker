@@ -1,25 +1,196 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Carbon Footprint Tracker</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carbon Footprint Tracker</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    width:95%;
+    max-width:1200px;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:20px;
+}
+
+.card{
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    padding:20px;
+    border-radius:20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+h2{
+    margin-bottom:15px;
+    font-weight:500;
+}
+
+.input-group{
+    margin-bottom:15px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    outline:none;
+    margin-top:5px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#00c6ff;
+    border:none;
+    border-radius:10px;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:10px;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#0072ff;
+}
+
+.result{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:600;
+    color:#00ffcc;
+}
+
+.chart-container{
+    height:300px;
+}
+
+@media(max-width:900px){
+    .container{
+        grid-template-columns:1fr;
+    }
+}
+</style>
 </head>
 <body>
 
-<h1>Carbon Footprint Tracker</h1>
-
 <div class="container">
-    <input type="number" id="electricity" placeholder="Electricity (kWh)">
-    <input type="number" id="car" placeholder="Car Travel (km)">
-    <input type="number" id="flight" placeholder="Flight Hours">
-    <button onclick="calculate()">Calculate</button>
+
+    <!-- INPUT CARD -->
+    <div class="card">
+        <h2>🌿 Carbon Footprint Calculator</h2>
+
+        <div class="input-group">
+            <label>Electricity Usage (kWh per month)</label>
+            <input type="number" id="electricity" placeholder="Enter kWh">
+        </div>
+
+        <div class="input-group">
+            <label>Car Travel (km per month)</label>
+            <input type="number" id="travel" placeholder="Enter km">
+        </div>
+
+        <div class="input-group">
+            <label>Flights (hours per month)</label>
+            <input type="number" id="flights" placeholder="Enter hours">
+        </div>
+
+        <button onclick="calculateFootprint()">Calculate Footprint</button>
+
+        <div class="result" id="result">Total CO₂: 0 kg</div>
+    </div>
+
+    <!-- DASHBOARD CARD -->
+    <div class="card">
+        <h2>📊 Emission Dashboard</h2>
+        <div class="chart-container">
+            <canvas id="carbonChart"></canvas>
+        </div>
+    </div>
+
 </div>
 
-<h2>Total Emission: <span id="result">0</span> kg CO2</h2>
+<script>
+let chart;
 
-<ul id="history"></ul>
+function calculateFootprint(){
 
-<script src="script.js"></script>
+    let electricity = parseFloat(document.getElementById("electricity").value) || 0;
+    let travel = parseFloat(document.getElementById("travel").value) || 0;
+    let flights = parseFloat(document.getElementById("flights").value) || 0;
+
+    // Carbon emission factors (approximate global averages)
+    let electricityEmission = electricity * 0.92; // kg CO2 per kWh
+    let travelEmission = travel * 0.21; // kg CO2 per km (car)
+    let flightEmission = flights * 90; // kg CO2 per flight hour
+
+    let total = electricityEmission + travelEmission + flightEmission;
+
+    document.getElementById("result").innerHTML = 
+        "Total CO₂: " + total.toFixed(2) + " kg per month";
+
+    updateChart(electricityEmission, travelEmission, flightEmission);
+}
+
+function updateChart(elec, travel, flight){
+
+    const ctx = document.getElementById('carbonChart').getContext('2d');
+
+    if(chart){
+        chart.destroy();
+    }
+
+    chart = new Chart(ctx,{
+        type:'doughnut',
+        data:{
+            labels:["Electricity","Travel","Flights"],
+            datasets:[{
+                data:[elec, travel, flight],
+                backgroundColor:[
+                    "#00c6ff",
+                    "#ff6a00",
+                    "#ff00cc"
+                ]
+            }]
+        },
+        options:{
+            responsive:true,
+            plugins:{
+                legend:{
+                    labels:{
+                        color:"white"
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
 
 </body>
 </html>
