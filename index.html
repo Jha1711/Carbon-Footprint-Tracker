@@ -3,95 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbon Footprint Tracker</title>
+<title>Carbon Dashboard</title>
 
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-<!-- Chart.js CDN -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Poppins', sans-serif;
+    font-family:'Inter', sans-serif;
 }
+
 
 body{
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:white;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:#fff;
     min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    padding:30px;
 }
 
-.container{
-    width:95%;
-    max-width:1200px;
+
+.dashboard{
     display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap:25px;
 }
+
 
 .card{
     background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    padding:20px;
+    backdrop-filter: blur(20px);
     border-radius:20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    padding:20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    transition:0.3s;
 }
 
-h2{
+
+.card:hover{
+    transform: translateY(-5px);
+}
+
+
+.big-card{
+    grid-column: span 2;
+}
+
+
+h3{
     margin-bottom:15px;
     font-weight:500;
 }
 
-.input-group{
-    margin-bottom:15px;
+
+.stat{
+    font-size:28px;
+    font-weight:600;
+    color:#00f5d4;
 }
+
+
+.small{
+    font-size:14px;
+    color:#94a3b8;
+}
+
+
+.input-group{
+    margin-bottom:10px;
+}
+
 
 input{
     width:100%;
-    padding:10px;
+    padding:8px;
     border:none;
     border-radius:10px;
     outline:none;
-    margin-top:5px;
 }
+
 
 button{
     width:100%;
-    padding:12px;
-    background:#00c6ff;
+    padding:10px;
+    background:#00f5d4;
     border:none;
     border-radius:10px;
-    color:white;
+    color:#000;
     font-weight:600;
     cursor:pointer;
     margin-top:10px;
-    transition:0.3s;
 }
 
-button:hover{
-    background:#0072ff;
+
+.progress{
+    background:#1e293b;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
 }
 
-.result{
-    margin-top:15px;
-    font-size:18px;
-    font-weight:600;
-    color:#00ffcc;
+
+.progress-bar{
+    height:10px;
+    background:#00f5d4;
+    width:65%;
 }
 
-.chart-container{
-    height:300px;
+
+.energy-box{
+    display:flex;
+    justify-content:space-between;
+    padding:8px;
+    background:rgba(255,255,255,0.05);
+    border-radius:10px;
+    margin-top:8px;
 }
 
-@media(max-width:900px){
-    .container{
+
+canvas{
+    margin-top:10px;
+}
+
+
+@media(max-width:1000px){
+    .dashboard{
         grid-template-columns:1fr;
     }
 }
@@ -99,98 +139,158 @@ button:hover{
 </head>
 <body>
 
-<div class="container">
 
-    <!-- INPUT CARD -->
+<div class="dashboard">
+
+
+    <!-- Calculator Card -->
     <div class="card">
-        <h2>🌿 Carbon Footprint Calculator</h2>
+        <h3>Carbon Calculator</h3>
+
 
         <div class="input-group">
-            <label>Electricity Usage (kWh per month)</label>
-            <input type="number" id="electricity" placeholder="Enter kWh">
+            <input type="number" id="electricity" placeholder="Electricity (kWh)">
         </div>
+
 
         <div class="input-group">
-            <label>Car Travel (km per month)</label>
-            <input type="number" id="travel" placeholder="Enter km">
+            <input type="number" id="travel" placeholder="Car Travel (km)">
         </div>
+
 
         <div class="input-group">
-            <label>Flights (hours per month)</label>
-            <input type="number" id="flights" placeholder="Enter hours">
+            <input type="number" id="flights" placeholder="Flights (hrs)">
         </div>
 
-        <button onclick="calculateFootprint()">Calculate Footprint</button>
 
-        <div class="result" id="result">Total CO₂: 0 kg</div>
+        <button onclick="calculate()">Calculate</button>
+
+
+        <div class="stat" id="totalCO2">0 kg</div>
+        <div class="small">Total Monthly Emission</div>
     </div>
 
-    <!-- DASHBOARD CARD -->
-    <div class="card">
-        <h2>📊 Emission Dashboard</h2>
-        <div class="chart-container">
-            <canvas id="carbonChart"></canvas>
-        </div>
+
+    <!-- Emission Chart -->
+    <div class="card big-card">
+        <h3>Emission Overview</h3>
+        <canvas id="lineChart"></canvas>
     </div>
+
+
+    <!-- Storage -->
+    <div class="card">
+        <h3>Carbon Budget</h3>
+        <div class="stat">65%</div>
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="small">Budget Used</div>
+    </div>
+
+
+    <!-- Stats -->
+    <div class="card">
+        <h3>Electricity</h3>
+        <div class="stat" id="elecStat">0 kg</div>
+        <div class="small">CO₂ Emission</div>
+    </div>
+
+
+    <div class="card">
+        <h3>Travel</h3>
+        <div class="stat" id="travelStat">0 kg</div>
+        <div class="small">CO₂ Emission</div>
+    </div>
+
+
+    <div class="card">
+        <h3>Flights</h3>
+        <div class="stat" id="flightStat">0 kg</div>
+        <div class="small">CO₂ Emission</div>
+    </div>
+
 
 </div>
 
+
 <script>
+
+
 let chart;
 
-function calculateFootprint(){
+
+function calculate(){
+
 
     let electricity = parseFloat(document.getElementById("electricity").value) || 0;
     let travel = parseFloat(document.getElementById("travel").value) || 0;
     let flights = parseFloat(document.getElementById("flights").value) || 0;
 
-    // Carbon emission factors (approximate global averages)
-    let electricityEmission = electricity * 0.92; // kg CO2 per kWh
-    let travelEmission = travel * 0.21; // kg CO2 per km (car)
-    let flightEmission = flights * 90; // kg CO2 per flight hour
 
-    let total = electricityEmission + travelEmission + flightEmission;
+    let elecCO2 = electricity * 0.92;
+    let travelCO2 = travel * 0.21;
+    let flightCO2 = flights * 90;
 
-    document.getElementById("result").innerHTML = 
-        "Total CO₂: " + total.toFixed(2) + " kg per month";
 
-    updateChart(electricityEmission, travelEmission, flightEmission);
+    let total = elecCO2 + travelCO2 + flightCO2;
+
+
+    document.getElementById("totalCO2").innerText = total.toFixed(2) + " kg";
+    document.getElementById("elecStat").innerText = elecCO2.toFixed(2) + " kg";
+    document.getElementById("travelStat").innerText = travelCO2.toFixed(2) + " kg";
+    document.getElementById("flightStat").innerText = flightCO2.toFixed(2) + " kg";
+
+
+    updateChart(elecCO2, travelCO2, flightCO2);
+
+
+    let percent = Math.min((total / 1000) * 100, 100);
+    document.getElementById("progressBar").style.width = percent + "%";
 }
+
 
 function updateChart(elec, travel, flight){
 
-    const ctx = document.getElementById('carbonChart').getContext('2d');
+
+    const ctx = document.getElementById('lineChart').getContext('2d');
+
 
     if(chart){
         chart.destroy();
     }
 
+
     chart = new Chart(ctx,{
-        type:'doughnut',
+        type:'line',
         data:{
             labels:["Electricity","Travel","Flights"],
             datasets:[{
+                label:"CO₂ Emission",
                 data:[elec, travel, flight],
-                backgroundColor:[
-                    "#00c6ff",
-                    "#ff6a00",
-                    "#ff00cc"
-                ]
+                borderColor:"#00f5d4",
+                backgroundColor:"rgba(0,245,212,0.1)",
+                tension:0.4,
+                fill:true
             }]
         },
         options:{
-            responsive:true,
             plugins:{
-                legend:{
-                    labels:{
-                        color:"white"
-                    }
-                }
+                legend:{ labels:{ color:"#fff"} }
+            },
+            scales:{
+                x:{ ticks:{ color:"#94a3b8"} },
+                y:{ ticks:{ color:"#94a3b8"} }
             }
         }
     });
 }
+
+
 </script>
+
 
 </body>
 </html>
+
+
